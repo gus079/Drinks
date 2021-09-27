@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = F, comment = "", message = F, fig.align = "center")
+knitr::opts_chunk$set(echo = TRUE, warning = F, comment = "", message = F, fig.align = "center", fig.asp = .638)
 ```
 
 ```{r}
@@ -40,6 +40,14 @@ drinks %>%
   arrange(-total_litres_of_pure_alcohol)
 ```
 ```{r}
+drinks %>% 
+  filter(total_litres_of_pure_alcohol != 0) %>% 
+  select(is.numeric) %>% 
+  summary()
+```
+
+
+```{r}
 corel <- drinks %>% 
   select(-country) %>% 
   cor
@@ -62,7 +70,7 @@ drinks %>%
   select(-country) %>% 
   lm(total_litres_of_pure_alcohol ~., . ) %>% 
   summary()
-drinks
+
 ```
 ```{r}
 drinks_longer <- drinks %>% 
@@ -98,6 +106,88 @@ p3 <- drinks_longer %>%
 library(patchwork)
 
 (p1 + p2) / p3 
+```
+
+```{r}
+beer1 <- drinks %>% 
+  slice_max(beer_servings, n=5) %>% 
+  ggplot(aes(reorder(country, -beer_servings), beer_servings)) + 
+  geom_bar(stat = "identity", fill = "#56B4E9") + 
+  geom_text(aes(label = beer_servings), vjust = -.3) + 
+  ylim(c(0,400)) + 
+  labs(x = "Countries", y = "Beer Servings", title = "Consumption of Beer (Top 6)")
+
+most_beer <- drinks %>% 
+  slice_max(beer_servings, n=5) 
+
+beer2 <- drinks_longer %>% 
+  filter(beverage != "total_litres_of_pure_alcohol") %>% 
+  filter(country %in% c("Germany", "Gabon", "Namibia", "Czech Republic", "Lithuania", "Poland")) %>% 
+  ggplot(aes(x = country, y = value, fill = beverage)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  labs(x = "Country", y = "Servings", fill = "Beverage", title = "Countries with major consumption of Beer",
+       subtitle = "Relation with other beverages") + 
+  scale_fill_discrete(labels = c("Beer", "Spirit", "Wine"))
+
+beer1 + beer2
+
+```
+
+```{r}
+spirit1 <- drinks %>% 
+  slice_max(spirit_servings, n=5) %>% 
+  ggplot(aes(reorder(country, -spirit_servings), spirit_servings)) + 
+  geom_bar(stat = "identity", fill = "#76C8C9") + 
+  geom_text(aes(label = spirit_servings), vjust = -.3) + 
+  ylim(0, 480) + 
+  labs(x = "Countries", y = "Spirit Servings", title = "Consumption of Spirit (Top 5)")
+
+most_spirit <- drinks %>% 
+  slice_max(spirit_servings, n=5) 
+
+spirit2 <- drinks_longer %>% 
+  filter(beverage != "total_litres_of_pure_alcohol") %>% 
+  filter(country %in% c("Grenada", "Belarus", "Haiti", "Russian Federation", "St. Lucia")) %>% 
+  ggplot(aes(x = country, y = value, fill = beverage)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  labs(x = "Country", y = "Servings", fill = "Beverage", title = "Countries with major consumption of Spirit",
+       subtitle = "Relation with other beverages") + 
+  scale_fill_discrete(labels = c("Beer", "Spirit", "Wine"))
+
+spirit1 + spirit2
+```
+```{r}
+wine1 <- drinks %>% 
+  slice_max(wine_servings, n=5) %>% 
+  ggplot(aes(reorder(country, -wine_servings), wine_servings)) + 
+  geom_bar(stat = "identity", fill = "#44C8C1") + 
+  geom_text(aes(label = wine_servings), vjust = -.3) + 
+  ylim(0, 400) + 
+  labs(x = "Countries", y = "Wine Servings", title = "Consumption of Wine (Top 5)")
+
+most_wine <- drinks %>% 
+  slice_max(wine_servings, n=5) 
+
+wine2 <- drinks_longer %>% 
+  filter(beverage != "total_litres_of_pure_alcohol") %>% 
+  filter(country %in% c("Frande", "Portugal", "Andorra", "Switzerland", "Denmark")) %>% 
+  ggplot(aes(x = country, y = value, fill = beverage)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  labs(x = "Country", y = "Servings", fill = "Beverage", title = "Countries with major consumption of Wine",
+       subtitle = "Relation with other beverages") + 
+  scale_fill_discrete(labels = c("Beer", "Spirit", "Wine"))
+
+wine1 + wine2
+```
+
+```{r}
+drinks %>% 
+  filter(total_litres_of_pure_alcohol != 0) %>% 
+  select(is.numeric) %>% 
+  summary()
+
+drinks %>% 
+  filter(country == "Argentina")
 ```
 
 
