@@ -1,0 +1,137 @@
+---
+title: "Drinks"
+author: "GS"
+date: "27/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, comment = "", message = F, fig.align = "center")
+```
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(ggcorrplot)
+library(corrr)
+
+theme_set(theme_bw())
+```
+
+```{r}
+drinks <- read_csv("drinks.csv")
+drinks
+```
+```{r}
+
+drinks %>% 
+  filter(total_litres_of_pure_alcohol == 0)
+
+drinks %>% 
+  arrange(-beer_servings)
+
+drinks %>% 
+  arrange(-spirit_servings)
+
+drinks %>% 
+  arrange(-wine_servings)
+
+drinks %>% 
+  arrange(-total_litres_of_pure_alcohol)
+```
+```{r}
+corel <- drinks %>% 
+  select(-country) %>% 
+  cor
+
+corel
+
+ggcorrplot(corel, 
+           method = "square",
+           type = "lower", 
+           lab = T)
+
+drinks %>% 
+  select(-country) %>% 
+  correlate() %>% 
+  network_plot()
+
+```
+```{r}
+drinks %>% 
+  select(-country) %>% 
+  lm(total_litres_of_pure_alcohol ~., . ) %>% 
+  summary()
+drinks
+```
+```{r}
+drinks_longer <- drinks %>% 
+  filter(total_litres_of_pure_alcohol != 0) %>% 
+  pivot_longer(cols = 2:5, names_to = "beverage", values_to = "value")
+
+drinks_longer %>% head
+```
+
+```{r}
+p1 <- drinks_longer %>% 
+  filter(beverage != "total_litres_of_pure_alcohol") %>% 
+  ggplot(aes(x = beverage, y = value, color = beverage)) +
+  geom_boxplot() + 
+  scale_color_discrete(labels = c("Beer", "Spirit", "Wine")) +
+  scale_x_discrete(labels = c("Beer", "Spirit", "Wine")) + 
+  labs(y = "Servings", x = "Beverage", color = "Beverage")
+
+p2 <- drinks_longer %>% 
+  filter(beverage != "total_litres_of_pure_alcohol") %>% 
+  ggplot(aes(value, color = beverage)) +
+  theme(legend.position = "none") + 
+  geom_density()
+
+p3 <- drinks_longer %>% 
+  filter(beverage != "total_litres_of_pure_alcohol") %>% 
+  ggplot(aes(value, color = beverage, fill = beverage)) +
+  geom_histogram() + 
+  facet_wrap(~beverage) + 
+  theme(legend.position = "none") + 
+  labs(x = "Servings")
+
+library(patchwork)
+
+(p1 + p2) / p3 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
